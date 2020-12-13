@@ -32,12 +32,12 @@ namespace CRM
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "CRM", Version = "v1" });
             });
+            services.AddHttpContextAccessor();
             // For Entity Framework  
             services.AddDbContext<AppDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("ConnStr")));
 
@@ -68,6 +68,13 @@ namespace CRM
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JWT:Secret"]))
                 };
             });
+
+            services.AddCors(c =>
+            {
+                c.AddPolicy("AllowOrigin", options => options.AllowAnyOrigin());
+            });
+
+
         }
     
 
@@ -82,6 +89,9 @@ namespace CRM
             }
 
             app.UseRouting();
+
+            app.UseCors(options => options.AllowAnyOrigin());
+
 
             app.UseAuthentication();
             app.UseAuthorization();
