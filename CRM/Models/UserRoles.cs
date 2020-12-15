@@ -10,6 +10,6 @@ namespace CRM.Models
         public const string Admin = "Admin";
         public const string Quality = "Quality";
         public const string Inbound = "Inbound";
-        public const string Outbiund = "Outbiund";
+        public const string Outbiund = "Outbound";
     }
 }
