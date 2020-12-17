@@ -69,9 +69,13 @@ namespace CRM
                 };
             });
 
-            services.AddCors(c =>
+            services.AddCors(options =>
             {
-                c.AddPolicy("AllowOrigin", options => options.AllowAnyOrigin());
+                options.AddDefaultPolicy(builder =>
+                    builder.SetIsOriginAllowed(_ => true)
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials());
             });
 
 
@@ -89,8 +93,10 @@ namespace CRM
             }
 
             app.UseRouting();
+            app.UseDefaultFiles();
+            app.UseStaticFiles();
 
-            app.UseCors(options => options.AllowAnyOrigin());
+            app.UseCors();
 
 
             app.UseAuthentication();

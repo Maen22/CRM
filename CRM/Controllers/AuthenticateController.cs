@@ -31,6 +31,7 @@ namespace CRM.Controllers
             this.roleManager = roleManager;
             _configuration = configuration;
         }
+
         [HttpPost]
         [Route("login")]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
@@ -85,6 +86,9 @@ namespace CRM.Controllers
                 SecurityStamp = Guid.NewGuid().ToString(),
                 UserName = model.Username
             };
+
+            
+             
             var role = model.Role;
             var result = await userManager.CreateAsync(user, model.Password);
             await userManager.AddToRoleAsync(user, role);

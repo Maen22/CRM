@@ -1,8 +1,10 @@
 ﻿using CRM.Models;
 using CRM.View_Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -20,7 +22,7 @@ namespace CRM.Controllers
         private readonly RoleManager<IdentityRole> roleManager;
         private readonly IConfiguration _configuration;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        
+
 
         public UserController(IHttpContextAccessor httpContextAccessor, UserManager<User> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration)
         {
@@ -52,11 +54,41 @@ namespace CRM.Controllers
                 };
 
                 return Ok(response);
-            } else
-            {
-                return NotFound(new Response { Status = "Failed", Message = "User Not Found!"});
             }
-            
+            else
+            {
+                return NotFound(new Response { Status = "Failed", Message = "User Not Found!" });
+            }
+
+        }
+
+        [Authorize(Roles = UserRoles.Admin)]
+        [HttpGet]
+        [Route("getAllUsers")]
+        public async Task<IActionResult> getAllUsers()
+        {
+            IList<User> users = await userManager.Users.ToListAsync();
+
+            if (users.Count > 0)
+            {
+                IList<Object> response = new List<Object>();
+
+                foreach (User user in users)
+                {
+                    var roles = await userManager.GetRolesAsync(user);
+                    response.Add(new
+                    {
+                        username = user.UserName,
+                        email = user.Email,
+                        role = roles[0]
+                    }) ;
+                }
+                return Ok(response);
+            }
+            else
+            {
+                return NotFound(new Response { Status = "Not Found", Message = "There is no users" });
+            }
         }
     }
 }
