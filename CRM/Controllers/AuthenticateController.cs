@@ -119,10 +119,12 @@ namespace CRM.Controllers
                 await _roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
             if (!await _roleManager.RoleExistsAsync(UserRoles.Quality))
                 await _roleManager.CreateAsync(new IdentityRole(UserRoles.Quality));
+            if (!await _roleManager.RoleExistsAsync(UserRoles.Operation))
+                await _roleManager.CreateAsync(new IdentityRole(UserRoles.Operation));
             if (!await _roleManager.RoleExistsAsync(UserRoles.Inbound))
                 await _roleManager.CreateAsync(new IdentityRole(UserRoles.Inbound));
-            if (!await _roleManager.RoleExistsAsync(UserRoles.Outbiund))
-                await _roleManager.CreateAsync(new IdentityRole(UserRoles.Outbiund));
+            if (!await _roleManager.RoleExistsAsync(UserRoles.Outbound))
+                await _roleManager.CreateAsync(new IdentityRole(UserRoles.Outbound));
 
             if (await _roleManager.RoleExistsAsync(UserRoles.Admin))
             {
