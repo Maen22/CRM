@@ -81,10 +81,10 @@ namespace CRM.Controllers
 
         [Authorize(Roles = UserRoles.Admin)]
         [HttpPut]
-        [Route("editUser")]
-        public async Task<IActionResult> EditUser([FromBody] UserInfo user)
+        [Route("editUser/{id}")]
+        public async Task<IActionResult> EditUser(string id, [FromBody] UserInfo user)
         {
-            var existingUser = _userManager.Users.FirstOrDefault(u => u.Id == user.Id);
+            var existingUser = _userManager.Users.FirstOrDefault(u => u.Id == id);
             
             var userRole = await _userManager.GetRolesAsync(existingUser);
             
