@@ -66,6 +66,7 @@ namespace CRM.Controllers
                     var roles = await _userManager.GetRolesAsync(user);
                     response.Add(new
                     {
+                        id = user.Id,
                         username = user.UserName,
                         email = user.Email,
                         role = roles[0]
