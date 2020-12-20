@@ -42,9 +42,7 @@ namespace CRM
             services.AddDbContext<AppDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("ConnStr")));
 
             // For Identity  
-            services.AddIdentity<User, IdentityRole>(
-               setupAction: options => options.User.RequireUniqueEmail = true
-                )
+            services.AddIdentity<User, IdentityRole>()
                 .AddEntityFrameworkStores<AppDbContext>()
                 .AddDefaultTokenProviders();
 
@@ -82,8 +80,6 @@ namespace CRM
 
 
         }
-    
-
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
