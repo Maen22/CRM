@@ -1,15 +1,12 @@
 ﻿using CRM.Models;
 using CRM.View_Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace CRM.Controllers
@@ -18,32 +15,23 @@ namespace CRM.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly UserManager<User> userManager;
-        private readonly RoleManager<IdentityRole> roleManager;
-        private readonly IConfiguration _configuration;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-
-
-        public UserController(IHttpContextAccessor httpContextAccessor, UserManager<User> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration)
+        private readonly UserManager<User> _userManager;
+        public UserController(UserManager<User> userManager)
         {
-            this._httpContextAccessor = httpContextAccessor;
-            this.userManager = userManager;
-            this.roleManager = roleManager;
-            _configuration = configuration;
+            _userManager = userManager;
         }
 
         [HttpGet]
         [Route("getUserInfo")]
-        public async Task<IActionResult> getUserInfo()
+        public async Task<IActionResult> GetUserInfo()
         {
             //ClaimsPrincipal currentUser = this.User;
-            var username = HttpContext.User.Identity.Name;
-            Console.WriteLine(username);
-            var user = await userManager.FindByNameAsync(username);
+            var username = HttpContext.User.Identity?.Name;
+            var user = await _userManager.FindByNameAsync(username);
 
             if (user != null)
             {
-                IList<string> userRole = await userManager.GetRolesAsync(user);
+                IList<string> userRole = await _userManager.GetRolesAsync(user);
 
                 UserInfo response = new UserInfo()
                 {
@@ -65,9 +53,9 @@ namespace CRM.Controllers
         [Authorize(Roles = UserRoles.Admin)]
         [HttpGet]
         [Route("getAllUsers")]
-        public async Task<IActionResult> getAllUsers()
+        public async Task<IActionResult> GetAllUsers()
         {
-            IList<User> users = await userManager.Users.ToListAsync();
+            IList<User> users = await _userManager.Users.ToListAsync();
 
             if (users.Count > 0)
             {
@@ -75,13 +63,13 @@ namespace CRM.Controllers
 
                 foreach (User user in users)
                 {
-                    var roles = await userManager.GetRolesAsync(user);
+                    var roles = await _userManager.GetRolesAsync(user);
                     response.Add(new
                     {
                         username = user.UserName,
                         email = user.Email,
                         role = roles[0]
-                    }) ;
+                    });
                 }
                 return Ok(response);
             }
@@ -89,6 +77,58 @@ namespace CRM.Controllers
             {
                 return NotFound(new Response { Status = "Not Found", Message = "There is no users" });
             }
+        }
+
+        [Authorize(Roles = UserRoles.Admin)]
+        [HttpPut]
+        [Route("editUser")]
+        public async Task<IActionResult> EditUser([FromBody] UserInfo user)
+        {
+            var existingUser = _userManager.Users.FirstOrDefault(u => u.Id == user.Id);
+            
+            var userRole = await _userManager.GetRolesAsync(existingUser);
+            
+            if (existingUser != null)
+            {
+                existingUser.UserName = user.Username;
+                existingUser.Email = user.Email;
+
+                await _userManager.UpdateAsync(existingUser);
+
+                if (userRole[0] != user.Role)
+                {
+                    await _userManager.RemoveFromRoleAsync(existingUser, userRole[0]);
+                    await _userManager.AddToRoleAsync(existingUser, user.Role);
+
+                    var role = await _userManager.GetRolesAsync(existingUser);
+
+                    Console.WriteLine(role[0]);
+                }
+
+            }
+            else
+            {
+                return NotFound();
+            }
+            return Ok();
+        }
+        
+        [Authorize(Roles = UserRoles.Admin)]
+        [HttpDelete]
+        [Route("deleteUser/{id}")]
+        public async Task<IActionResult> EditUser(string id)
+        {
+            var existingUser = _userManager.Users.FirstOrDefault(u => u.Id == id);
+
+            if (existingUser != null)
+            {
+                await _userManager.DeleteAsync(existingUser);
+            }
+            else
+            {
+                return NotFound();
+            }
+            return Ok();
         }
     }
 }
