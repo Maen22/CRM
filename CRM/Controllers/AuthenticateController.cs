@@ -15,9 +15,9 @@ using System.Threading.Tasks;
 
 namespace CRM.Controllers
 {
+    // This Class Handles The Authentication (Login, Register).
     [Route("api/[controller]")]
     [ApiController]
-
     public class AuthenticateController : ControllerBase
     {
         private readonly UserManager<User> _userManager;
@@ -26,11 +26,12 @@ namespace CRM.Controllers
 
         public AuthenticateController(UserManager<User> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration)
         {
-            this._userManager = userManager;
-            this._roleManager = roleManager;
+            _userManager = userManager;
+            _roleManager = roleManager;
             _configuration = configuration;
         }
-
+        
+        // Login Controller Handles The Login When Login Model Is Sent.
         [HttpPost]
         [Route("login")]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
@@ -70,6 +71,7 @@ namespace CRM.Controllers
             return Unauthorized();
         }
 
+        // Register Controller, This Is Only Used By The Admin To Add New Users
         [Authorize(Roles = UserRoles.Admin)]
         [HttpPost]
         [Route("register")]
@@ -85,9 +87,6 @@ namespace CRM.Controllers
                 SecurityStamp = Guid.NewGuid().ToString(),
                 UserName = model.Username
             };
-
-            
-             
             var role = model.Role;
             var result = await _userManager.CreateAsync(user, model.Password);
             await _userManager.AddToRoleAsync(user, role);
@@ -96,7 +95,8 @@ namespace CRM.Controllers
 
             return Ok(new Response { Status = "Success", Message = "User created successfully!" });
         }
-
+        
+        // Private Register Controller To Register The Admins.
         [HttpPost]
         [Route("register-admin")]
         public async Task<IActionResult> RegisterAdmin([FromBody] RegisterModel model)

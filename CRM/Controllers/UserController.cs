@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 
 namespace CRM.Controllers
 {
+    // This Class Handles User Related Information
     [Route("api/[controller]")]
     [ApiController]
     public class UserController : ControllerBase
@@ -20,7 +21,8 @@ namespace CRM.Controllers
         {
             _userManager = userManager;
         }
-
+        
+        // Controller To Get a Specific User's Information (Logged in User).
         [HttpGet]
         [Route("getUserInfo")]
         public async Task<IActionResult> GetUserInfo()
@@ -50,6 +52,7 @@ namespace CRM.Controllers
 
         }
 
+        // Controller To Get All The User's Information (In The System).
         [Authorize(Roles = UserRoles.Admin)]
         [HttpGet]
         [Route("getAllUsers")]
@@ -80,6 +83,7 @@ namespace CRM.Controllers
             }
         }
 
+        // Controller To Edit a Specific User Information.
         [Authorize(Roles = UserRoles.Admin)]
         [HttpPut]
         [Route("editUser/{id}")]
@@ -114,6 +118,7 @@ namespace CRM.Controllers
             return Ok();
         }
         
+        // Controller To Delete a Specific User.
         [Authorize(Roles = UserRoles.Admin)]
         [HttpDelete]
         [Route("deleteUser/{id}")]
